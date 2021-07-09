@@ -1,9 +1,10 @@
 const { validation } = require("./validationObj");
+const { adInputs, userInputs } = require("../validation/inputsObj");
+const api = require("../DAL/api");
 
 function validationFunc(inputsValues, { name, value }, carType) {
-  console.log(name);
   const errors = [];
-  if (carType === 3 && name === "gear") return;
+  if (Number(carType) === 3 && name === "gear") return;
   let isValid = true;
   if (validation[name].required && !value) {
     errors.push(validation[name].requiredError);
@@ -51,7 +52,65 @@ function cehckInputBeforeDB(inputValues, carType) {
   return dbInputs;
 }
 
+function validationMiddle(expectedInput) {
+  return (req, res) => {
+    const inputAd = req.body;
+
+    for (const key in expectedInput) {
+      expectedInput[key].value = inputAd[key];
+    }
+    const carType = expectedInput.cartype
+      ? expectedInput.cartype.value
+      : undefined;
+    const objectData = cehckInputBeforeDB(expectedInput, carType);
+
+    if (!objectData) {
+      return { status: "faild", inputsValue: expectedInput };
+    }
+    return { status: "ok" };
+  };
+}
+
+async function adValidtions(req, res, next) {
+  const checkInputs = validationMiddle(adInputs);
+  const respone = checkInputs(req, res);
+  if (respone.status !== "ok") {
+    return res.json(respone);
+  }
+  const responeDB = await api.checkAdDB(req.body);
+
+  if (responeDB.status !== "ok") {
+    return res.status(400).json(responeDB);
+  }
+
+  req.images = [];
+
+  for (const file of req.files) {
+    req.images.push(file.filename);
+  }
+
+  next();
+}
+
+async function addUserValidtions(req, res, next) {
+  const checkInputs = validationMiddle(userInputs);
+  const respone = checkInputs(req, res);
+  if (respone.status !== "ok") {
+    return res.json(respone);
+  }
+
+  const responeDB = await api.checkUserDB(req.body.email);
+
+  if (responeDB.status !== "ok") {
+    return res.status(400).json(responeDB);
+  }
+
+  next();
+}
+
 module.exports = {
   validationFunc,
   cehckInputBeforeDB,
+  adValidtions,
+  addUserValidtions,
 };
