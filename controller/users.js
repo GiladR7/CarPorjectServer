@@ -31,14 +31,7 @@ const getLogIn = async (req, res) => {
 
 const addUser = async (req, res) => {
   try {
-    const inputValues = req.body;
-    const submitValues = cehckInputBeforeDB(inputValues);
-
-    if (!submitValues) {
-      return res.status(400).json({ status: "faild", inputValues });
-    }
-
-    const dbRespone = await api.addUser(submitValues);
+    const dbRespone = await api.addUser(req.body);
 
     if (dbRespone.status === "ok") {
       return res.json(dbRespone);

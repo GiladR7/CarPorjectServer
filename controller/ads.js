@@ -1,5 +1,5 @@
 const api = require("../DAL/api");
-const { cehckInputBeforeDB } = require("../validation/validationFuc");
+
 const getAds = async (req, res) => {
   try {
     const {
@@ -72,29 +72,29 @@ const removeFromFavorite = async (req, res) => {
 
 const addNewAd = async (req, res) => {
   try {
-    const { part1, part2, userID } = req.body;
-    const checkPart2 = cehckInputBeforeDB(part2, part1.cartype.value);
-    const checkPart1 = cehckInputBeforeDB(part1);
-    if (!checkPart2) {
-      return res.json({ status: "falid", part2Validtion: part2 });
-    }
-    if (!checkPart1) {
-      return res.json({
-        status: "falid",
-        message: "מלא את השלב הראשון בצורה תקינה",
-      });
-    }
-
-    const responeDB = await api.addNewAd(userID, {
-      ...checkPart1,
-      ...checkPart2,
+    const { userID, ...adData } = req.body;
+    const respone = await api.addNewAd(userID, adData, req.images);
+    res.json(respone);
+  } catch (err) {
+    console.error(err);
+    res.json({
+      status: "faild",
+      message: "קיימת שגיאת מערכת נסה שנית מאוחר יותר",
     });
-    res.json(responeDB);
+  }
+};
+
+const deleteAd = async (req, res) => {
+  try {
+    const { adID, userID } = req.body;
+    console.log(adID, userID);
+    await api.removeAd(adID, userID);
+    res.json({ status: "ok", message: "ad deleted" });
   } catch (err) {
     console.log(err);
     res.json({
       status: "faild",
-      message: "קיימת שגיאת מערכת נסה שנית מאוחר יותר",
+      message: "got some error when try to delete ad",
     });
   }
 };
@@ -105,4 +105,5 @@ module.exports = {
   setNewFavoriteAd,
   removeFromFavorite,
   addNewAd,
+  deleteAd,
 };

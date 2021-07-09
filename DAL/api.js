@@ -1,4 +1,5 @@
 const mysql = require("mysql2");
+
 const pool = mysql.createPool({
   connectionLimit: 10,
   host: "localhost",
@@ -7,6 +8,7 @@ const pool = mysql.createPool({
   password: "8214778Gad",
   database: "cars-data",
 });
+
 const queries = {
   selectUsers: `select * from users`,
   getUserCategories(userID) {
@@ -168,6 +170,14 @@ const queries = {
     from ads
     where adID = ${adID};`;
   },
+  addAdImages(adID, ...images) {
+    return `insert into images (adID , imageUrl)
+    ${images[0] ? `values (${adID},"${images[0]}")` : ""}
+    ${images[1] ? ` ,(${adID},"${images[1]}")` : ""}
+    ${images[2] ? ` ,(${adID},"${images[2]}")` : ""}
+    ${images[3] ? ` ,(${adID},"${images[3]}")` : ""}
+    ${images[4] ? ` ,(${adID},"${images[4]}")` : ""};`;
+  },
   getAreaCodes: `select * from phone_area_codes`,
   checkCodeAreaExists(codeID) {
     return `select * from 
@@ -207,6 +217,11 @@ const queries = {
             from users_favorites
             where adID = ${adID} and userID = ${userID};`;
   },
+  removeAd(adID, userID) {
+    return `delete
+            from ads
+            where adID = ${adID}  and userID = ${userID}`;
+  },
 };
 const sqlQurayPromise = (query) => {
   return new Promise((resolve, reject) => {
@@ -240,24 +255,15 @@ async function getGears() {
 async function getCarCategories() {
   return sqlQurayPromise(queries.getCategoriesQuery);
 }
-async function addNewAd(
-  userID,
-  {
-    cartype,
-    manufactur,
-    model,
-    owners,
-    year,
-    km,
-    color,
-    gear,
-    codeArea,
-    phone,
-    city,
-    price,
-    moreDetails,
-  }
-) {
+
+async function checkAdDB({
+  cartype,
+  manufactur,
+  model,
+  color,
+  gear,
+  codeArea,
+}) {
   const carModelExists = await sqlQurayPromise(
     queries.cehckIfCarExists(cartype, manufactur, model)
   );
@@ -281,6 +287,30 @@ async function addNewAd(
       message: "קידומת ,סוג גיר או הצבע שהכנסת אינם מופיעים ברשימה",
     };
   }
+
+  return {
+    status: "ok",
+  };
+}
+async function addNewAd(
+  userID,
+  {
+    cartype,
+    manufactur,
+    model,
+    owners,
+    year,
+    km,
+    color,
+    gear,
+    codeArea,
+    phone,
+    city,
+    price,
+    moreDetails,
+  },
+  images
+) {
   const newAd = await sqlQurayPromise(
     queries.addNewAd(
       userID,
@@ -299,7 +329,11 @@ async function addNewAd(
       moreDetails
     )
   );
-  return { status: "ok", newId: newAd.insertId };
+
+  if (images.length) {
+    await sqlQurayPromise(queries.addAdImages(newAd.insertId, ...images));
+  }
+  return { status: "ok", adId: newAd.insertId };
 }
 
 async function getAds(
@@ -335,6 +369,10 @@ const setFavoriteAd = async (adID, userID) => {
   await sqlQurayPromise(queries.setNewFavoriteAd(adID, userID));
   const likeAds = await sqlQurayPromise(queries.getIDsOfFavorites(userID));
   return likeAds;
+};
+
+const removeAd = async (adID, userID) => {
+  return await sqlQurayPromise(queries.removeAd(adID, userID));
 };
 
 const removeAdFromFavorite = async (userID, adID) => {
@@ -439,7 +477,7 @@ async function updateUserDetails(userID, { user, email, chooseCategory }) {
   };
 }
 
-async function addUser({ user, email, password, chooseCategory }) {
+async function checkUserDB(email) {
   const emailUnique = await sqlQurayPromise(queries.emailExists(email));
   if (emailUnique.length !== 0) {
     return {
@@ -447,6 +485,10 @@ async function addUser({ user, email, password, chooseCategory }) {
       message: "ההרשמה נכשלה ,איימיל קיים כבר במערכת",
     };
   }
+  return { status: "ok" };
+}
+
+async function addUser({ user, email, password, chooseCategory }) {
   const newUser = await sqlQurayPromise(
     queries.addNewUser(user, email, password)
   );
@@ -477,5 +519,8 @@ const api = {
   removeAdFromFavorite,
   updateUserDetails,
   addNewAd,
+  checkAdDB,
+  removeAd,
+  checkUserDB,
 };
 module.exports = api;
