@@ -1,4 +1,5 @@
 const api = require("../DAL/api");
+const bcrypt = require("bcrypt");
 const { cehckInputBeforeDB } = require("../validation/validationFuc");
 const getUsers = async (req, res) => {
   try {
@@ -14,8 +15,9 @@ const getLogIn = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await api.logIn(email, password);
-    if (user.length) {
-      return res.json({ status: "success", data: user });
+
+    if (user) {
+      return res.json({ status: "success", data: [user] });
     }
     res
       .status(404)
@@ -31,7 +33,9 @@ const getLogIn = async (req, res) => {
 
 const addUser = async (req, res) => {
   try {
-    const dbRespone = await api.addUser(req.body);
+    const { password, ...rest } = req.body;
+    const hashPassword = await bcrypt.hash(password, 10);
+    const dbRespone = await api.addUser({ hashPassword, ...rest });
 
     if (dbRespone.status === "ok") {
       return res.json(dbRespone);
@@ -50,6 +54,7 @@ const addUser = async (req, res) => {
 const updateUserDetails = async (req, res) => {
   try {
     const [{ userID }, inputValues] = req.body;
+
     const submitValues = cehckInputBeforeDB(inputValues);
 
     if (!submitValues) {

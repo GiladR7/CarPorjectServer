@@ -49,21 +49,6 @@ const adInputs = {
     errors: [],
     isValid: true,
   },
-  cartype: {
-    value: "",
-    errors: [],
-    isValid: true,
-  },
-  manufactur: {
-    value: "",
-    errors: [],
-    isValid: true,
-  },
-  model: {
-    value: "",
-    errors: [],
-    isValid: true,
-  },
 };
 
 const userInputs = {

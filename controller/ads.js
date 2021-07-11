@@ -73,6 +73,7 @@ const removeFromFavorite = async (req, res) => {
 const addNewAd = async (req, res) => {
   try {
     const { userID, ...adData } = req.body;
+
     const respone = await api.addNewAd(userID, adData, req.images);
     res.json(respone);
   } catch (err) {
@@ -87,7 +88,7 @@ const addNewAd = async (req, res) => {
 const deleteAd = async (req, res) => {
   try {
     const { adID, userID } = req.body;
-    console.log(adID, userID);
+
     await api.removeAd(adID, userID);
     res.json({ status: "ok", message: "ad deleted" });
   } catch (err) {
@@ -99,6 +100,22 @@ const deleteAd = async (req, res) => {
   }
 };
 
+const updateAd = async (req, res) => {
+  try {
+    const { userID, adID, ...adData } = req.body;
+    console.log(adData);
+    await api.updateAd(userID, adID, adData, req.images);
+
+    res.json({ status: "ok", message: "ad update" });
+  } catch (err) {
+    console.error(err);
+    res.json({
+      status: "faild",
+      message: "קיימת שגיאת מערכת בעדכון פרטי המודעה",
+    });
+  }
+};
+
 module.exports = {
   getAds,
   getFavoritesAds,
@@ -106,4 +123,5 @@ module.exports = {
   removeFromFavorite,
   addNewAd,
   deleteAd,
+  updateAd,
 };
