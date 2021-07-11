@@ -1,9 +1,11 @@
 const { validation } = require("./validationObj");
 const { adInputs, userInputs } = require("../validation/inputsObj");
 const api = require("../DAL/api");
+const { cartype, manufactur, model, ...updateAdInputs } = { ...adInputs };
 
 function validationFunc(inputsValues, { name, value }, carType) {
   const errors = [];
+
   if (Number(carType) === 3 && name === "gear") return;
   let isValid = true;
   if (validation[name].required && !value) {
@@ -54,15 +56,13 @@ function cehckInputBeforeDB(inputValues, carType) {
 
 function validationMiddle(expectedInput) {
   return (req, res) => {
-    const inputAd = req.body;
+    const { chooseCategory, ...inputAd } = req.body;
 
     for (const key in expectedInput) {
       expectedInput[key].value = inputAd[key];
     }
-    const carType = expectedInput.cartype
-      ? expectedInput.cartype.value
-      : undefined;
-    const objectData = cehckInputBeforeDB(expectedInput, carType);
+
+    const objectData = cehckInputBeforeDB(expectedInput, chooseCategory);
 
     if (!objectData) {
       return { status: "faild", inputsValue: expectedInput };
@@ -72,12 +72,15 @@ function validationMiddle(expectedInput) {
 }
 
 async function adValidtions(req, res, next) {
-  const checkInputs = validationMiddle(adInputs);
+  const expectedInput = req.method === "POST" ? adInputs : updateAdInputs;
+  const checkInputs = validationMiddle(expectedInput);
   const respone = checkInputs(req, res);
   if (respone.status !== "ok") {
     return res.json(respone);
   }
-  const responeDB = await api.checkAdDB(req.body);
+
+  console.log(req.body);
+  const responeDB = await api.checkAdDB(req.body, req.method);
 
   if (responeDB.status !== "ok") {
     return res.status(400).json(responeDB);
