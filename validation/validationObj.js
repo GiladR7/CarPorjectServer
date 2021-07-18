@@ -89,6 +89,9 @@ const validation = {
   chooseCategory: {
     require: false,
   },
+  chooseCategories: {
+    require: false,
+  },
   owners: {
     required: true,
     funcValidation(owners) {

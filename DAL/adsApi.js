@@ -99,7 +99,6 @@ async function updateAd(
   },
   images
 ) {
-  console.log(description);
   await sqlQurayPromise(
     queries.updateAd(
       userID,
@@ -130,7 +129,10 @@ async function getAds(
   orderBy,
   desc = false,
   startFrom,
-  limit
+  limit,
+  models,
+  manufacturers,
+  userOnline
 ) {
   const myQueries =
     editData === "true"
@@ -143,11 +145,27 @@ async function getAds(
           orderBy,
           desc,
           startFrom,
-          limit
+          limit,
+          models,
+          manufacturers
         )} 
         ${queries.getAdsImageQuery(adID)}`;
   const [adsData, adsImages] = await sqlQurayPromise(myQueries);
+
   mergeBetweenTables(adsData, adsImages, "images", "adid", "imageUrl");
+  if (userOnline) {
+    for (const ad of adsData) {
+      ad.userAd = false;
+      if (ad.userID === userOnline) {
+        ad.userAd = true;
+      }
+    }
+  } else if (userID) {
+    for (const ad of adsData) {
+      ad.userAd = true;
+    }
+  }
+
   return adsData;
 }
 
@@ -166,6 +184,19 @@ const removeAdFromFavorite = async (userID, adID) => {
   const likeAds = await sqlQurayPromise(queries.getIDsOfFavorites(userID));
 
   return likeAds;
+};
+
+const addView = async (userID, adID) => {
+  const myQueries = `${queries.getAdsDataQuery(adID)} ${queries.checkIfUserView(
+    userID,
+    adID
+  )}`;
+
+  const [adExists, userView] = await sqlQurayPromise(myQueries);
+  console.log(adExists, userView);
+  if (adExists.length && !userView.length) {
+    await sqlQurayPromise(queries.addView(userID, adID));
+  }
 };
 
 async function getFavoritesAds(userID) {
@@ -192,4 +223,5 @@ module.exports = {
   removeAdFromFavorite,
   getFavoritesAds,
   updateAd,
+  addView,
 };

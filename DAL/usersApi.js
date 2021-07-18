@@ -16,11 +16,12 @@ async function logIn(email, password) {
       }
     }
   }
-  console.log(authUser);
+
   if (authUser) {
     const userCategories = await sqlQurayPromise(
       queries.getUserCategories(authUser.userID)
     );
+
     mergeBetweenTables(
       [authUser],
       userCategories,
@@ -33,8 +34,21 @@ async function logIn(email, password) {
   return authUser;
 }
 
-async function getUsers() {
-  return sqlQurayPromise(queries.selectUsers);
+async function getUsers(userID) {
+  const userData = await sqlQurayPromise(queries.selectUserByID(userID));
+  const userCategories = await sqlQurayPromise(
+    queries.getUserCategories(userID)
+  );
+
+  mergeBetweenTables(
+    userData,
+    userCategories,
+    "chooseCategory",
+    "userID",
+    "categoryID"
+  );
+  const [{ userID: secretData, ...resetData }] = userData;
+  return resetData;
 }
 
 async function updateUserDetails(userID, { user, email, chooseCategory }) {
@@ -65,9 +79,13 @@ async function updateUserDetails(userID, { user, email, chooseCategory }) {
     "userID",
     "categoryID"
   );
+
+  const [userData] = updateUser;
+  const { userID: sectetData, ...restData } = userData;
+  console.log(restData);
   return {
     status: "ok",
-    data: updateUser,
+    data: [restData],
   };
 }
 
@@ -86,15 +104,15 @@ async function addUser({
   user,
   email,
   hashPassword: password,
-  chooseCategory,
+  chooseCategories,
 }) {
   const newUser = await sqlQurayPromise(
     queries.addNewUser(user, email, password)
   );
 
-  if (chooseCategory.length) {
+  if (chooseCategories.length) {
     await sqlQurayPromise(
-      queries.addUserCategories(newUser.insertId, ...chooseCategory)
+      queries.addUserCategories(newUser.insertId, ...chooseCategories)
     );
   }
 

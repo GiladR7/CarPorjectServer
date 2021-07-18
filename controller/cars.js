@@ -1,5 +1,5 @@
 const api = require("../DAL/api");
-
+const jwt = require(`jsonwebtoken`);
 const getCategories = async (req, res) => {
   try {
     const carsCategories = await api.getCarCategories();

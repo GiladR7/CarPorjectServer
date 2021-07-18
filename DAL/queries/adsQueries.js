@@ -6,7 +6,9 @@ const queries = {
     orderBy,
     desc,
     startFrom,
-    limit = false
+    limit = false,
+    models,
+    manufacturers
   ) {
     return `select ads.adid , ads.userID ,  modelname , manufacturername , gearname , count(ad_views.adID) views
           , description , owners , carprice , year(modelyear) modelyear , km , phone , city , colorname,
@@ -24,7 +26,11 @@ const queries = {
           on phone_area_codes.codeID = ads.codeAreaID
           left join ad_views
           on ads.adID = ad_views.adID
-          ${adID || userID || categoriesID || startFrom ? "where" : ""}
+          ${
+            adID || userID || categoriesID || startFrom || manufacturers
+              ? "where"
+              : ""
+          }
           ${adID ? `ads.adID = ${adID}` : ""} 
           ${adID && userID ? "and" : ""}
           ${userID ? `ads.userID = ${userID}` : ""}
@@ -33,10 +39,22 @@ const queries = {
               ? `(ads.categoryID in(${Array.from(categoriesID).join(",")}))`
               : ""
           }
+          ${manufacturers && categoriesID ? "and" : ""}
+          ${
+            manufacturers
+              ? ` ads.manufacturerID in (${Array.from(manufacturers).join(
+                  ","
+                )})`
+              : ""
+          }
+          ${
+            models ? `and ads.modelID in (${Array.from(models).join(",")})` : ""
+          }
            ${startFrom ? `and ads.adID >= ${startFrom}` : ""}
            group by ads.adID
           ${orderBy ? `order by ${orderBy}` : ""}
           ${desc === "true" ? "desc" : ""}
+         
           ${limit ? `limit ${limit}` : ""};`;
   },
   getIDsOfFavorites(userID) {
@@ -86,7 +104,7 @@ const queries = {
             values(${userID} , ${model} , ${cartype}, ${manufactur} , 
               ${gear ? gear : null} ,
               ${
-                moreDetails ? `"${moreDetails}"` : null
+                moreDetails ? `'${moreDetails}'` : null
               } , ${owners} , ${price} , "${year}", ${km},
               "${phone}", "${city}" ,${color}, ${codeArea})`;
   },
@@ -171,7 +189,7 @@ const queries = {
             codeAreaID = ${codeArea}${gear ? `, gearID = ${gear}` : ""} ,
             ${
               description
-                ? `description = "${description}" `
+                ? `description = '${description}' `
                 : "description = null"
             }
             where userID = ${userID} and adID = ${adID};`;
@@ -180,6 +198,20 @@ const queries = {
     return `delete
             from images
             where adID = ${adID}`;
+  },
+  checkIfUserView(userID, adID) {
+    return `select *
+            from ad_views
+            where userID = ${userID} and adID = ${adID}`;
+  },
+  addView(userID, adID) {
+    return `insert into ad_views (userID , adID)
+            values(${userID} , ${adID}) `;
+  },
+  getMyAdsIds(userID) {
+    return `select adID 
+    from ads
+    where userID = ${userID}`;
   },
 };
 

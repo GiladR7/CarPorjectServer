@@ -3,10 +3,15 @@ const queries = require("./queries/carsQueries");
 const sqlQurayPromise = require("./DBconnection");
 
 async function getManufacturers(categoryID) {
-  return sqlQurayPromise(queries.getManufacturersQuery(categoryID));
+  if (categoryID) {
+    return sqlQurayPromise(queries.getManufacturersByCategory(categoryID));
+  }
+  return sqlQurayPromise(queries.getAllManufacturers);
 }
 
 async function getModels(categoryID, manufacturerID) {
+  console.log(manufacturerID);
+  console.log(queries.getModelsQuery(categoryID, manufacturerID));
   return sqlQurayPromise(queries.getModelsQuery(categoryID, manufacturerID));
 }
 

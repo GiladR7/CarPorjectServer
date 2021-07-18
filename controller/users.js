@@ -1,9 +1,11 @@
 const api = require("../DAL/api");
 const bcrypt = require("bcrypt");
+require(`dotenv`).config();
 const { cehckInputBeforeDB } = require("../validation/validationFuc");
+const jwt = require("jsonwebtoken");
 const getUsers = async (req, res) => {
   try {
-    const users = await api.getUsers();
+    const users = await api.getUsers(req.userID);
     res.json(users);
   } catch (err) {
     console.log(err);
@@ -17,7 +19,13 @@ const getLogIn = async (req, res) => {
     const user = await api.logIn(email, password);
 
     if (user) {
-      return res.json({ status: "success", data: [user] });
+      const token = jwt.sign({ userID: user.userID }, process.env.ACCESS_TOKEN);
+      res.cookie("token", token, {
+        maxAge: 9000000000,
+      });
+
+      const { userID, ...userData } = user;
+      return res.json({ status: "success", data: [userData] });
     }
     res
       .status(404)
@@ -53,15 +61,15 @@ const addUser = async (req, res) => {
 
 const updateUserDetails = async (req, res) => {
   try {
-    const [{ userID }, inputValues] = req.body;
-
+    const inputValues = req.body;
+    console.log(inputValues);
     const submitValues = cehckInputBeforeDB(inputValues);
 
     if (!submitValues) {
       res.status(400).json({ status: "faild", inputValues });
     }
 
-    const dbRespone = await api.updateUserDetails(userID, submitValues);
+    const dbRespone = await api.updateUserDetails(req.userID, submitValues);
 
     if (dbRespone.status === "ok") {
       return res.json(dbRespone);

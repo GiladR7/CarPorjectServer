@@ -8,6 +8,8 @@ const getAds = async (req, res) => {
       userID,
       categoryID: categoriesID,
       orderBy,
+      modelID: models,
+      manufacturerID: manufacturers,
       desc,
       startFrom,
       limit,
@@ -21,7 +23,10 @@ const getAds = async (req, res) => {
       orderBy,
       desc,
       startFrom,
-      limit
+      limit,
+      models,
+      manufacturers,
+      req.userID
     );
 
     if (ads.length) {
@@ -34,12 +39,25 @@ const getAds = async (req, res) => {
   }
 };
 
+async function getMyAds(req, res) {
+  try {
+    const ads = await api.getAds(undefined, req.userID);
+    if (ads.length) {
+      return res.json({ status: "ok", data: ads });
+    }
+    res.status(404).json({ status: "faild", message: "ad not exists" });
+  } catch (err) {
+    console.log(err);
+    res.status(404).send("got some error when try to get ads");
+  }
+}
+
 const getFavoritesAds = async (req, res) => {
   try {
-    const { userID } = req.query;
-    const ads = await api.getFavoritesAds(userID);
+    const ads = await api.getFavoritesAds(req.userID);
+
     if (ads.length) {
-      return res.json(ads);
+      return res.json({ status: "ok", ads });
     }
     res.status(404).send("favoritesAds for this id not exists");
   } catch (err) {
@@ -50,8 +68,8 @@ const getFavoritesAds = async (req, res) => {
 
 const setNewFavoriteAd = async (req, res) => {
   try {
-    const { userID, adID } = req.body;
-    const responeDB = await api.setFavoriteAd(adID, userID);
+    const { adID } = req.body;
+    const responeDB = await api.setFavoriteAd(adID, req.userID);
     res.json(responeDB);
   } catch (err) {
     console.log(err);
@@ -61,8 +79,8 @@ const setNewFavoriteAd = async (req, res) => {
 
 const removeFromFavorite = async (req, res) => {
   try {
-    const { userID, adID } = req.body;
-    const responeDB = await api.removeAdFromFavorite(userID, adID);
+    const { adID } = req.body;
+    const responeDB = await api.removeAdFromFavorite(req.userID, adID);
     res.json(responeDB);
   } catch (err) {
     console.log(err);
@@ -72,9 +90,9 @@ const removeFromFavorite = async (req, res) => {
 
 const addNewAd = async (req, res) => {
   try {
-    const { userID, ...adData } = req.body;
+    const { ...adData } = req.body;
 
-    const respone = await api.addNewAd(userID, adData, req.images);
+    const respone = await api.addNewAd(req.userID, adData, req.images);
     res.json(respone);
   } catch (err) {
     console.error(err);
@@ -87,9 +105,9 @@ const addNewAd = async (req, res) => {
 
 const deleteAd = async (req, res) => {
   try {
-    const { adID, userID } = req.body;
+    const { adID } = req.body;
 
-    await api.removeAd(adID, userID);
+    await api.removeAd(adID, req.userID);
     res.json({ status: "ok", message: "ad deleted" });
   } catch (err) {
     console.log(err);
@@ -102,9 +120,9 @@ const deleteAd = async (req, res) => {
 
 const updateAd = async (req, res) => {
   try {
-    const { userID, adID, ...adData } = req.body;
-    console.log(adData);
-    await api.updateAd(userID, adID, adData, req.images);
+    const { adID, ...adData } = req.body;
+
+    await api.updateAd(req.userID, adID, adData, req.images);
 
     res.json({ status: "ok", message: "ad update" });
   } catch (err) {
@@ -112,6 +130,40 @@ const updateAd = async (req, res) => {
     res.json({
       status: "faild",
       message: "קיימת שגיאת מערכת בעדכון פרטי המודעה",
+    });
+  }
+};
+
+const addView = async (req, res) => {
+  try {
+    const { adID } = req.body;
+
+    await api.addView(req.userID, adID);
+
+    res.json({ status: "ok", message: "ad update View" });
+  } catch (err) {
+    console.error(err);
+    res.json({
+      status: "faild",
+      message: "got some error when try to ad view",
+    });
+  }
+};
+
+const canEditAd = async (req, res) => {
+  try {
+    const { adID } = req.query;
+    const ad = await api.getAds(adID, req.userID);
+
+    if (ad.length) {
+      return res.json({ status: "ok", data: ad });
+    }
+    res.status(404).json({ status: "faild", message: "ad not exists" });
+  } catch (err) {
+    console.error(err);
+    res.json({
+      status: "faild",
+      message: "got some error when val",
     });
   }
 };
@@ -124,4 +176,7 @@ module.exports = {
   addNewAd,
   deleteAd,
   updateAd,
+  addView,
+  getMyAds,
+  canEditAd,
 };

@@ -1,5 +1,9 @@
 queries = {
-  selectUsers: `select userID , username as user , email , userPassword from users`,
+  selectUsers: `select userID, username as user , email , userPassword from users`,
+  selectUserByID(userID) {
+    return `select userID , username as user , email from users
+  where userID = ${userID}`;
+  },
   getUserCategories(userID) {
     return `select * 
       from users_categories
