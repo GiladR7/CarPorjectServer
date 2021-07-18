@@ -79,7 +79,6 @@ async function adValidtions(req, res, next) {
     return res.json(respone);
   }
 
-  console.log(req.body);
   const responeDB = await api.checkAdDB(req.body, req.method);
 
   if (responeDB.status !== "ok") {
