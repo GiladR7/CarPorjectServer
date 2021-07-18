@@ -1,5 +1,5 @@
 const queries = {
-  getManufacturersQuery(categoryID) {
+  getManufacturersByCategory(categoryID) {
     return `select distinct 
           models.manufacturerID, manufacturerName 
         from models
@@ -7,6 +7,7 @@ const queries = {
         on models.ManufacturerID = manufacturers.ManufacturerID
         ${categoryID ? `where CategoryID = ${categoryID}` : ""};`;
   },
+  getAllManufacturers: `select * from manufacturers`,
   getCarColorsQuery: `select * from car_color`,
 
   getGearsQuery: `select * from gears`,
@@ -17,7 +18,11 @@ const queries = {
           ${categoryID || manufacturerID ? "where" : ""} 
           ${categoryID ? `CategoryID = ${categoryID}` : " "}  
           ${categoryID && manufacturerID ? "and" : ""} 
-          ${manufacturerID ? `ManufacturerID = ${manufacturerID}` : ""};`;
+          ${
+            manufacturerID
+              ? `ManufacturerID in(${Array.from(manufacturerID).join(",")})`
+              : ""
+          };`;
   },
 
   getAreaCodes: `select * from phone_area_codes`,

@@ -14,6 +14,7 @@ const {
   removeAdFromFavorite,
   getFavoritesAds,
   updateAd,
+  addView,
 } = require("./adsApi");
 const {
   getPhoneAreaCodes,
@@ -44,5 +45,6 @@ const api = {
   removeAd,
   checkUserDB,
   updateAd,
+  addView,
 };
 module.exports = api;

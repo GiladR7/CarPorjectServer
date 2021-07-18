@@ -56,7 +56,7 @@ const userInputs = {
   email: { value: "", isValid: true, errors: [] },
   password: { value: "", isValid: true, errors: [] },
   confirmPassword: { value: "", isValid: true, errors: [] },
-  chooseCategory: { value: [], isValid: true, errors: [] },
+  chooseCategories: { value: [], isValid: true, errors: [] },
 };
 
 module.exports = {
