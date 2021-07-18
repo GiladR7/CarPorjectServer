@@ -62,7 +62,7 @@ const addUser = async (req, res) => {
 const updateUserDetails = async (req, res) => {
   try {
     const inputValues = req.body;
-    console.log(inputValues);
+
     const submitValues = cehckInputBeforeDB(inputValues);
 
     if (!submitValues) {

@@ -10,8 +10,6 @@ async function getManufacturers(categoryID) {
 }
 
 async function getModels(categoryID, manufacturerID) {
-  console.log(manufacturerID);
-  console.log(queries.getModelsQuery(categoryID, manufacturerID));
   return sqlQurayPromise(queries.getModelsQuery(categoryID, manufacturerID));
 }
 
