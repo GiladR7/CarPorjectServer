@@ -1,7 +1,7 @@
 var express = require("express");
 const router = express.Router();
 const jwtMiddle = require("../utilities/jwtMiddle");
-const { addUserValidtions } = require("../validation/validationFuc");
+const { userValidtions } = require("../validation/validationFuc");
 const {
   getLogIn,
   getUsers,
@@ -20,7 +20,7 @@ router.get("/logOut", (req, res) => {
 router
   .route("/")
   .get(jwtMiddle, getUsers)
-  .post(addUserValidtions, addUser)
-  .put(jwtMiddle, updateUserDetails);
+  .post(userValidtions, addUser)
+  .put(jwtMiddle, userValidtions, updateUserDetails);
 
 module.exports = router;

@@ -8,7 +8,8 @@ const queries = {
     startFrom,
     limit = false,
     models,
-    manufacturers
+    manufacturers,
+    offset
   ) {
     return `select ads.adid , ads.userID ,  modelname , manufacturername , gearname , count(ad_views.adID) views
           , description , owners , carprice , year(modelyear) modelyear , km , phone , city , colorname,
@@ -55,7 +56,8 @@ const queries = {
           ${orderBy ? `order by ${orderBy}` : ""}
           ${desc === "true" ? "desc" : ""}
          
-          ${limit ? `limit ${limit}` : ""};`;
+          ${limit ? `limit ${limit}` : ""}
+          ${offset ? `offset ${offset}` : ""};`;
   },
   getIDsOfFavorites(userID) {
     return `select  userID, adID
