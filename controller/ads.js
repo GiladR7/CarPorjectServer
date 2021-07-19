@@ -13,6 +13,7 @@ const getAds = async (req, res) => {
       desc,
       startFrom,
       limit,
+      offset,
     } = req.query;
 
     const ads = await api.getAds(
@@ -26,7 +27,8 @@ const getAds = async (req, res) => {
       limit,
       models,
       manufacturers,
-      req.userID
+      req.userID,
+      offset
     );
 
     if (ads.length) {

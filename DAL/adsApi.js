@@ -132,7 +132,8 @@ async function getAds(
   limit,
   models,
   manufacturers,
-  userOnline
+  userOnline,
+  offset
 ) {
   const myQueries =
     editData === "true"
@@ -147,11 +148,25 @@ async function getAds(
           startFrom,
           limit,
           models,
-          manufacturers
+          manufacturers,
+          offset
         )} 
         ${queries.getAdsImageQuery(adID)}`;
   const [adsData, adsImages] = await sqlQurayPromise(myQueries);
-
+  console.log(
+    queries["getAdsDataQuery"](
+      adID,
+      userID,
+      categoriesID,
+      orderBy,
+      desc,
+      startFrom,
+      limit,
+      models,
+      manufacturers,
+      offset
+    )
+  );
   mergeBetweenTables(adsData, adsImages, "images", "adid", "imageUrl");
   if (userOnline) {
     for (const ad of adsData) {

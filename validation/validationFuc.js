@@ -2,7 +2,7 @@ const { validation } = require("./validationObj");
 const { adInputs, userInputs } = require("../validation/inputsObj");
 const api = require("../DAL/api");
 const { cartype, manufactur, model, ...updateAdInputs } = { ...adInputs };
-
+const { password, confirmPassword, ...userUpdateInputs } = { ...userInputs };
 function validationFunc(inputsValues, { name, value }, carType) {
   const errors = [];
 
@@ -94,17 +94,21 @@ async function adValidtions(req, res, next) {
   next();
 }
 
-async function addUserValidtions(req, res, next) {
-  const checkInputs = validationMiddle(userInputs);
+async function userValidtions(req, res, next) {
+  const expectedInput = req.method === "POST" ? userInputs : userUpdateInputs;
+
+  const checkInputs = validationMiddle(expectedInput);
   const respone = checkInputs(req, res);
   if (respone.status !== "ok") {
     return res.json(respone);
   }
 
-  const responeDB = await api.checkUserDB(req.body.email);
+  if (req.method === "POST") {
+    const responeDB = await api.checkUserDB(req.body.email);
 
-  if (responeDB.status !== "ok") {
-    return res.status(400).json(responeDB);
+    if (responeDB.status !== "ok") {
+      return res.status(400).json(responeDB);
+    }
   }
 
   next();
@@ -114,5 +118,5 @@ module.exports = {
   validationFunc,
   cehckInputBeforeDB,
   adValidtions,
-  addUserValidtions,
+  userValidtions,
 };

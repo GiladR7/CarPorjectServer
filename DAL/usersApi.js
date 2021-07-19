@@ -25,7 +25,7 @@ async function logIn(email, password) {
     mergeBetweenTables(
       [authUser],
       userCategories,
-      "chooseCategory",
+      "chooseCategories",
       "userID",
       "categoryID"
     );
@@ -43,7 +43,7 @@ async function getUsers(userID) {
   mergeBetweenTables(
     userData,
     userCategories,
-    "chooseCategory",
+    "chooseCategories",
     "userID",
     "categoryID"
   );
@@ -51,7 +51,7 @@ async function getUsers(userID) {
   return resetData;
 }
 
-async function updateUserDetails(userID, { user, email, chooseCategory }) {
+async function updateUserDetails(userID, { user, email, chooseCategories }) {
   const emailUnique = await sqlQurayPromise(queries.emailExists(email, userID));
   if (emailUnique.length !== 0) {
     return {
@@ -62,8 +62,10 @@ async function updateUserDetails(userID, { user, email, chooseCategory }) {
 
   await sqlQurayPromise(queries.removeUserCategories(userID));
 
-  if (chooseCategory.length) {
-    await sqlQurayPromise(queries.addUserCategories(userID, ...chooseCategory));
+  if (chooseCategories.length) {
+    await sqlQurayPromise(
+      queries.addUserCategories(userID, ...chooseCategories)
+    );
   }
 
   await sqlQurayPromise(queries.updateUserNameAndEmail(userID, user, email));
@@ -75,7 +77,7 @@ async function updateUserDetails(userID, { user, email, chooseCategory }) {
   mergeBetweenTables(
     updateUser,
     userCategories,
-    "chooseCategory",
+    "chooseCategories",
     "userID",
     "categoryID"
   );

@@ -61,15 +61,7 @@ const addUser = async (req, res) => {
 
 const updateUserDetails = async (req, res) => {
   try {
-    const inputValues = req.body;
-
-    const submitValues = cehckInputBeforeDB(inputValues);
-
-    if (!submitValues) {
-      res.status(400).json({ status: "faild", inputValues });
-    }
-
-    const dbRespone = await api.updateUserDetails(req.userID, submitValues);
+    const dbRespone = await api.updateUserDetails(req.userID, req.body);
 
     if (dbRespone.status === "ok") {
       return res.json(dbRespone);
