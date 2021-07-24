@@ -126,8 +126,8 @@ async function getAds(
   userID,
   editData,
   categoriesID,
-  orderBy,
-  desc = false,
+  orderBy = "adDate",
+  desc = "true",
   startFrom,
   limit,
   models,
@@ -153,20 +153,7 @@ async function getAds(
         )} 
         ${queries.getAdsImageQuery(adID)}`;
   const [adsData, adsImages] = await sqlQurayPromise(myQueries);
-  console.log(
-    queries["getAdsDataQuery"](
-      adID,
-      userID,
-      categoriesID,
-      orderBy,
-      desc,
-      startFrom,
-      limit,
-      models,
-      manufacturers,
-      offset
-    )
-  );
+
   mergeBetweenTables(adsData, adsImages, "images", "adid", "imageUrl");
   if (userOnline) {
     for (const ad of adsData) {
@@ -208,7 +195,7 @@ const addView = async (userID, adID) => {
   )}`;
 
   const [adExists, userView] = await sqlQurayPromise(myQueries);
-  console.log(adExists, userView);
+
   if (adExists.length && !userView.length) {
     await sqlQurayPromise(queries.addView(userID, adID));
   }

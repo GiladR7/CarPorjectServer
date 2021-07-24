@@ -1,15 +1,16 @@
 const api = require("../DAL/api");
 const bcrypt = require("bcrypt");
 require(`dotenv`).config();
-const { cehckInputBeforeDB } = require("../validation/validationFuc");
+
 const jwt = require("jsonwebtoken");
+
 const getUsers = async (req, res) => {
   try {
     const users = await api.getUsers(req.userID);
     res.json(users);
   } catch (err) {
     console.log(err);
-    res.status(404)(`get some error when try to get users`);
+    res.status(500)(`get some error when try to get users`);
   }
 };
 
@@ -21,18 +22,18 @@ const getLogIn = async (req, res) => {
     if (user) {
       const token = jwt.sign({ userID: user.userID }, process.env.ACCESS_TOKEN);
       res.cookie("token", token, {
-        maxAge: 9000000000,
+        maxAge: 900000000,
       });
 
       const { userID, ...userData } = user;
       return res.json({ status: "success", data: [userData] });
     }
     res
-      .status(404)
+      .status(400)
       .json({ status: "faild", message: "איימל או סיסמא אינם נכונים" });
   } catch (err) {
     console.log(err);
-    res.status(404).json({
+    res.status(500).json({
       status: "faild",
       message: "קיימת בעיה במערכת נסה שוב מאוחר יותר",
     });
@@ -46,13 +47,13 @@ const addUser = async (req, res) => {
     const dbRespone = await api.addUser({ hashPassword, ...rest });
 
     if (dbRespone.status === "ok") {
-      return res.json(dbRespone);
+      return res.status(201).json(dbRespone);
     } else {
       return res.status(400).json(dbRespone);
     }
   } catch (err) {
     console.log(err);
-    return res.status(400).json({
+    return res.status(500).json({
       status: "faild",
       message: "קיימת שגיאת מערכת בהוספת משתמש חדש נסה שנית מאוחר יותר",
     });
@@ -70,7 +71,7 @@ const updateUserDetails = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.status(400).json({
+    return res.status(500).json({
       status: "faild",
       message: "קיימת שגיאת מערכת בעדכון פרטים נסה שנית מאוחר יותר",
     });

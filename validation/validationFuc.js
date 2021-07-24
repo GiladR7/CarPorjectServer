@@ -72,26 +72,35 @@ function validationMiddle(expectedInput) {
 }
 
 async function adValidtions(req, res, next) {
-  const expectedInput = req.method === "POST" ? adInputs : updateAdInputs;
-  const checkInputs = validationMiddle(expectedInput);
-  const respone = checkInputs(req, res);
-  if (respone.status !== "ok") {
-    return res.json(respone);
+  try {
+    const expectedInput = req.method === "POST" ? adInputs : updateAdInputs;
+
+    const checkInputs = validationMiddle(expectedInput);
+    const respone = checkInputs(req, res);
+
+    if (respone.status !== "ok") {
+      return res.json(respone);
+    }
+
+    const responeDB = await api.checkAdDB(req.body, req.method);
+
+    if (responeDB.status !== "ok") {
+      return res.status(400).json(responeDB);
+    }
+
+    req.images = [];
+
+    for (const file of req.files) {
+      req.images.push(file.filename);
+    }
+
+    next();
+  } catch (err) {
+    console.error(err);
+    res
+      .status(400)
+      .json({ status: "faild", message: "שגיאה נסה שנית מאוחר יותר" });
   }
-
-  const responeDB = await api.checkAdDB(req.body, req.method);
-
-  if (responeDB.status !== "ok") {
-    return res.status(400).json(responeDB);
-  }
-
-  req.images = [];
-
-  for (const file of req.files) {
-    req.images.push(file.filename);
-  }
-
-  next();
 }
 
 async function userValidtions(req, res, next) {

@@ -37,7 +37,7 @@ const getAds = async (req, res) => {
     res.status(404).json({ status: "faild", message: "ad not exists" });
   } catch (err) {
     console.log(err);
-    res.status(404).send("got some error when try to get ads");
+    res.status(500).send("got some error when try to get ads");
   }
 };
 
@@ -50,7 +50,7 @@ async function getMyAds(req, res) {
     res.status(404).json({ status: "faild", message: "ad not exists" });
   } catch (err) {
     console.log(err);
-    res.status(404).send("got some error when try to get ads");
+    res.status(500).send("got some error when try to get ads");
   }
 }
 
@@ -64,7 +64,7 @@ const getFavoritesAds = async (req, res) => {
     res.status(404).send("favoritesAds for this id not exists");
   } catch (err) {
     console.log(err);
-    res.status(404).send("get some error when try to get favorites ads");
+    res.status(500).send("get some error when try to get favorites ads");
   }
 };
 
@@ -75,7 +75,7 @@ const setNewFavoriteAd = async (req, res) => {
     res.json(responeDB);
   } catch (err) {
     console.log(err);
-    res.status(404).send("get some error when try set new favoriteAd");
+    res.status(500).send("get some error when try set new favoriteAd");
   }
 };
 
@@ -86,16 +86,15 @@ const removeFromFavorite = async (req, res) => {
     res.json(responeDB);
   } catch (err) {
     console.log(err);
-    res.status(404).send("get some error when try remove ad form favorite");
+    res.status(500).send("get some error when try remove ad form favorite");
   }
 };
 
 const addNewAd = async (req, res) => {
   try {
     const { ...adData } = req.body;
-
     const respone = await api.addNewAd(req.userID, adData, req.images);
-    res.json(respone);
+    res.status(201).json(respone);
   } catch (err) {
     console.error(err);
     res.json({
@@ -113,7 +112,7 @@ const deleteAd = async (req, res) => {
     res.json({ status: "ok", message: "ad deleted" });
   } catch (err) {
     console.log(err);
-    res.json({
+    res.status(500).json({
       status: "faild",
       message: "got some error when try to delete ad",
     });
@@ -129,7 +128,7 @@ const updateAd = async (req, res) => {
     res.json({ status: "ok", message: "ad update" });
   } catch (err) {
     console.error(err);
-    res.json({
+    res.status(500).json({
       status: "faild",
       message: "קיימת שגיאת מערכת בעדכון פרטי המודעה",
     });
@@ -142,10 +141,10 @@ const addView = async (req, res) => {
 
     await api.addView(req.userID, adID);
 
-    res.json({ status: "ok", message: "ad update View" });
+    res.status(204).json({ status: "ok", message: "add new view" });
   } catch (err) {
     console.error(err);
-    res.json({
+    res.status(500).json({
       status: "faild",
       message: "got some error when try to ad view",
     });
@@ -163,7 +162,7 @@ const canEditAd = async (req, res) => {
     res.status(404).json({ status: "faild", message: "ad not exists" });
   } catch (err) {
     console.error(err);
-    res.json({
+    res.status(500).json({
       status: "faild",
       message: "got some error when val",
     });

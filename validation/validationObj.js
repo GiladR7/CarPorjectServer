@@ -33,7 +33,7 @@ const validation = {
     requiredError: "שנת הרכב הוא שדה חובה",
     funcValidation(year) {
       const d = new Date();
-      year = year.split("-")[0];
+      year = year ? year.split("-")[0] : 0;
       return 1950 > year || year > d.getFullYear();
     },
     customError: `ניתן לעלות רכב בין השנים ${new Date().getFullYear()} - ${1950}`,

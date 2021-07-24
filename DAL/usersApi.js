@@ -8,7 +8,7 @@ async function logIn(email, password) {
   const users = await sqlQurayPromise(queries.selectUsers);
   let authUser;
   for (const user of users) {
-    if (user.email == email) {
+    if (user.email.toLowerCase() == email.toLowerCase()) {
       if (await bcrypt.compare(password, user.userPassword)) {
         const { userPassword, ...userData } = user;
         authUser = userData;
