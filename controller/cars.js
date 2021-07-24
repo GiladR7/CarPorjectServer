@@ -1,12 +1,12 @@
 const api = require("../DAL/api");
-const jwt = require(`jsonwebtoken`);
+
 const getCategories = async (req, res) => {
   try {
     const carsCategories = await api.getCarCategories();
     res.json(carsCategories);
   } catch (err) {
     console.log(err);
-    res.status(404).send("get some error when try to get car categories");
+    res.status(500).send("get some error when try to get car categories");
   }
 };
 
@@ -20,7 +20,7 @@ const getManufacturers = async (req, res) => {
     res.status(404).send("manufacturer not found");
   } catch (err) {
     console.log(err);
-    res.status(404).send("get some error when try to get manufacturers");
+    res.status(500).send("get some error when try to get manufacturers");
   }
 };
 
@@ -34,7 +34,7 @@ const getModels = async (req, res) => {
     res.status(404).send("model not found");
   } catch (err) {
     console.log(err);
-    res.status(404).send("get some error when try to get models");
+    res.status(500).send("get some error when try to get models");
   }
 };
 
@@ -44,7 +44,7 @@ const getColors = async (req, res) => {
     res.json(colors);
   } catch (err) {
     console.log(err);
-    res.status(404).send("get some error when try to get car colors");
+    res.status(500).send("get some error when try to get car colors");
   }
 };
 
@@ -54,7 +54,7 @@ const getGears = async (req, res) => {
     res.json(gears);
   } catch (err) {
     console.log(err);
-    res.status(404).send("get some error when try to get car gears");
+    res.status(500).send("get some error when try to get car gears");
   }
 };
 const getPhoneAreaCodes = async (req, res) => {
@@ -63,7 +63,7 @@ const getPhoneAreaCodes = async (req, res) => {
     res.json(phoneCodes);
   } catch (err) {
     console.log(err);
-    res.status(404).send("got some error when try to get phone codes area ");
+    res.status(500).send("got some error when try to get phone codes area ");
   }
 };
 

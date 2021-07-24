@@ -7,7 +7,7 @@ function jwtMiddle(req, res, next) {
     if (err) {
       console.log(err);
       return res
-        .status(400)
+        .status(401)
         .json({ status: "failed", message: "unvalid token" });
     } else {
       const { userID } = decoded;
